@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 import jwt from  "jsonwebtoken"; 
 import { json } from "express/lib/response";
 
-import { UserModel, ContentModel } from "./db";       
+import { UserModel, ContentModel, LinkModel } from "./db"; 
+
+import { random } from "./utils";
 
 import { JWT_PASSWORD } from "./config";
 import { userMiddleware } from "./middleware";
@@ -98,7 +100,7 @@ app.get("/api/v1/content", userMiddleware,async (req, res) => {
     //@ts-ignore
     const userId = req.userId;
 
-    const content = await ContentModel.findOne({
+    const content = await ContentModel.find({
         userId
     }).populate("userId", "username");
 
@@ -108,16 +110,91 @@ app.get("/api/v1/content", userMiddleware,async (req, res) => {
 
 })
 
-app.delete("/api/v1/content", (req, res)=> {
+app.delete("/api/v1/content", userMiddleware,async (req, res)=> {
+    const contentId = req.body.contentId;
+    //@ts-ignore
+    const userId = req.userId;
+    await ContentModel.deleteOne({
+        contentId,
+        userId
+    })
+
+    res.json({
+        message: "Deleted!"
+    })
+
 
 })
 
-app.post("/api/v1/brain/share", (req, res) => {
+app.post("/api/v1/brain/share", userMiddleware,async (req, res) => {
+    const {share} = req.body
+    if(share) {
+
+        const existingLink = await LinkModel.findOne({
+            //@ts-ignore
+            userId: req.userId
+        })
+        if(existingLink) {
+            res.status(200).json({
+                hash: existingLink.hash
+            })
+            return;
+        }
+        const hash = random(10);
+
+       await  LinkModel.create({
+            //@ts-ignore
+            userId: req.userId,
+            hash: hash
+       })
+        res.status(200).json({
+        hash: hash
+    })
+
+    }else{
+        await LinkModel.deleteOne({
+            //@ts-ignore
+            userId: req.userId
+        });
+        //@ts-ignore
+        console.log(req.userId);
+        res.json({
+            message: "Removed Link!"
+        })
+    }
+   
 
 })
 
-app.get("/api/v1/brain/:shareLink", (req, res)=> {
+app.get("/api/v1/brain/:shareLink", async (req, res)=> {
+        const hash = req.params.shareLink;
     
+    const link = await LinkModel.findOne({
+        hash
+    })
+
+    if(!link) {
+
+        res.status(404).json({
+            message: "Sorry incorrect input!"
+        })
+        return;
+    }
+    const userId = link.userId;
+    const content = await ContentModel.find({
+        userId
+    }).populate("userId", "username")
+    /*if(!user) {
+        res.status(411).json({
+            message: "user not found , should ideally not happen!"   // written by sniper at code ... mouli
+        })
+        return;
+    } */
+
+    res.status(200).json({  
+        content
+    })
+
 })
 
 
