@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import jwt from  "jsonwebtoken"; 
+import cors from "cors"
 import { json } from "express/lib/response";
 
 import { UserModel, ContentModel, LinkModel } from "./db"; 
@@ -11,6 +12,8 @@ import { JWT_PASSWORD } from "./config";
 import { userMiddleware } from "./middleware";
 const app = express();
 app.use(express.json())
+app.use(cors());
+
 
 
 
@@ -21,23 +24,36 @@ app.post("/api/v1/signup", async (req, res) => {
 
     const username = req.body.username;
     const password = req.body.password;
-
+    console.log(username, password);
     try {
+
+         const existingUser = await UserModel.findOne({
+            username
+         })
+         if(existingUser) {
+            res.send({
+                message: "user already exists!"
+            })
+
+            return;
+         }
          await UserModel.create({
             username: username,
             password: password
          })
-
-         res.status(200).json({
-            message: "User signed up"
+         res.send({
+            message: "you are signed up!"
          })
-
     }catch(err) {
-        res.status(411).json({
-            message: "user already exists"
+        res.status(404).json({
+            message: "something went away be cool!"
         })
+        return;
         
     }
+    res.send({
+        message: "user signed up"
+    })
 
 })
 
