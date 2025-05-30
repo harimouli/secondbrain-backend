@@ -127,13 +127,23 @@ app.get("/api/v1/content", userMiddleware,async (req, res) => {
 })
 
 app.delete("/api/v1/content", userMiddleware,async (req, res)=> {
-    const contentId = req.body.contentId;
+    const link = req.body.link;
+
     //@ts-ignore
     const userId = req.userId;
-    await ContentModel.deleteOne({
-        contentId,
-        userId
-    })
+    try {
+             await ContentModel.deleteOne({
+                link,
+                userId
+            })
+            res.json({
+                message: "Deleted succesfully!"
+            })
+    }catch(err) {
+        res.json({
+            message: "Something went wrong!"
+        })
+    }
 
     res.json({
         message: "Deleted!"
