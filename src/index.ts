@@ -78,7 +78,7 @@ app.post("/api/v1/signin", async (req, res) => {
         }
         const token = jwt.sign({
             id: existingUser._id
-        }, JWT_PASSWORD);
+        }, process.env.JWT_PASSWORD!);
 
         res.status(200).json({
             token
