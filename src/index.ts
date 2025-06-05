@@ -72,6 +72,10 @@ app.post("/api/v1/signin", async (req, res) => {
         password
     })
     if(existingUser) {
+        if (!JWT_PASSWORD) {
+            res.status(500).json({ message: "Something went wrong bhai" });
+            return;
+        }
         const token = jwt.sign({
             id: existingUser._id
         }, JWT_PASSWORD);
