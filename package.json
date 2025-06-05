@@ -14,7 +14,6 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
-    "@types/mongoose": "^5.11.96",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -27,6 +26,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/mongoose": "^5.11.96",
     "@types/node": "^22.15.29"
   }
 }
