@@ -1,7 +1,8 @@
-{
+ {
   "name": "second-brain",
   "version": "1.0.0",
   "main": "index.js",
+  "$schema": "https://json.schemastore.org/package",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -b",
