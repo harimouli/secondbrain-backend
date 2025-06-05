@@ -1,5 +1,5 @@
+
 {
-  "$schema": "https://json.schemastore.org/tsconfig.json",
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
@@ -9,8 +9,8 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": false,
-    "skipLibCheck": true
-
+    "skipLibCheck": true,
+    "types": ["node"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
