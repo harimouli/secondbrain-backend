@@ -10,6 +10,11 @@ import { random } from "./utils";
 
 import { JWT_PASSWORD } from "./config";
 import { userMiddleware } from "./middleware";
+
+import dotenv from "dotenv"
+dotenv.config();
+
+const PORT  =  3000;
 const app = express();
 app.use(express.json())
 app.use(cors());
@@ -24,7 +29,7 @@ app.post("/api/v1/signup", async (req, res) => {
 
     const username = req.body.username;
     const password = req.body.password;
-    console.log(username, password);
+  
     try {
 
          const existingUser = await UserModel.findOne({
@@ -132,22 +137,23 @@ app.delete("/api/v1/content", userMiddleware,async (req, res)=> {
     //@ts-ignore
     const userId = req.userId;
     try {
-             await ContentModel.deleteOne({
+           const response =    await ContentModel.deleteOne({
                 link,
                 userId
             })
+          
             res.json({
                 message: "Deleted succesfully!"
             })
+
+
     }catch(err) {
         res.json({
             message: "Something went wrong!"
         })
     }
 
-    res.json({
-        message: "Deleted!"
-    })
+    
 
 
 })
@@ -224,6 +230,6 @@ app.get("/api/v1/brain/:shareLink", async (req, res)=> {
 })
 
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || PORT ,() => {
     console.log("server is listening on port");
 })

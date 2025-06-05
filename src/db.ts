@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 const {Schema, model} = mongoose;
+import dotenv from "dotenv"
+
+dotenv.config();
+
 
 
 async function main() {
-    await mongoose.connect("mongodb+srv://harimoulimuthyala:dbUserPassword@cluster0.nrzfaps.mongodb.net/brainly");
-
+    const mongoUrl = process.env.MONGO_URL;
+    if (!mongoUrl) {
+        throw new Error("MONGO_URL environment variable is not bhai");
+    }
+    await mongoose.connect(mongoUrl);
+    
 }
 
 const UserSchema = new Schema({
