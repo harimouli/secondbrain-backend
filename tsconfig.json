@@ -1,18 +1,16 @@
 {
   "compilerOptions": {
-    /* Language and Environment */
-    "target": "es2016",                     /* JavaScript version for output */
-    "module": "commonjs",                   /* Module system to use */
-    "rootDir": "./src",                     /* Source files location */
-    "outDir": "./dist",                     /* Compiled JS output location */
-    "esModuleInterop": true,                /* Enable default imports for CommonJS modules */
-    "forceConsistentCasingInFileNames": true,  /* Ensure consistent casing in imports */
-    "strict": true,                         /* Enable all strict type-checking options */
-    "noImplicitAny": false,                 /* Allow implicit any types */
-    "skipLibCheck": true,                   /* Skip type checking for declaration files */
-    "types": ["node"],
-    "typeRoots": ["./node_modules/@types"]                       /* Enable Node.js type definitions */
+    "target": "es2016",
+    "module": "commonjs",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "types": ["node"]
   },
-  "include": ["src"],                       /* Include source files in compilation */
-  "exclude": ["node_modules", "dist"]       /* Exclude folders from compilation */
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
