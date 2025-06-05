@@ -10,7 +10,8 @@
     "strict": true,                         /* Enable all strict type-checking options */
     "noImplicitAny": false,                 /* Allow implicit any types */
     "skipLibCheck": true,                   /* Skip type checking for declaration files */
-    "types": ["node"]                       /* Enable Node.js type definitions */
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"]                       /* Enable Node.js type definitions */
   },
   "include": ["src"],                       /* Include source files in compilation */
   "exclude": ["node_modules", "dist"]       /* Exclude folders from compilation */
