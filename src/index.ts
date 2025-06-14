@@ -85,7 +85,7 @@ app.post("/api/v1/signin", async (req, res) => {
         })
     }else{
         res.status(401).json({
-            message: "Incorrect credentials"
+            message: "Invalid username or password"
         })
     }
 
