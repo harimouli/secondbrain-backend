@@ -232,7 +232,7 @@ app.get("/api/v1/brain/:shareLink", async (req, res)=> {
 
 })
 
-app.post("api/v1/user-meta-data", userMiddleware, async (req: Request, res: Response)=> {
+app.post("/api/v1/user-meta-data", userMiddleware, async (req: Request, res: Response)=> {
 
 
     try {
