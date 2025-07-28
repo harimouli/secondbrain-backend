@@ -1,5 +1,8 @@
 import express from "express";
+import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
+
+import { ObjectId } from "mongoose";
 import jwt from  "jsonwebtoken"; 
 import cors from "cors"
 import { json } from "express/lib/response";
@@ -23,7 +26,7 @@ app.use(cors());
 
 
 
-app.post("/api/v1/signup", async (req, res) => {
+app.post("/api/v1/signup", async (req: Request, res: Response) => {
    //TODO  //zod validation , hash password
 
 
@@ -56,13 +59,9 @@ app.post("/api/v1/signup", async (req, res) => {
         return;
         
     }
-    res.send({
-        message: "user signed up"
-    })
-
 })
 
-app.post("/api/v1/signin", async (req, res) => {
+app.post("/api/v1/signin", async (req: Request, res: Response) => {
 
     const username = req.body.username;
     const password = req.body.password;
@@ -94,7 +93,7 @@ app.post("/api/v1/signin", async (req, res) => {
 
 })
 
-app.post("/api/v1/content", userMiddleware,async(req, res) => {
+app.post("/api/v1/content", userMiddleware,async(req: Request, res: Response) => {
         const link = req.body.link;
         const title = req.body.title;
         const type = req.body.type
@@ -121,7 +120,7 @@ app.post("/api/v1/content", userMiddleware,async(req, res) => {
 
 })
 
-app.get("/api/v1/content", userMiddleware,async (req, res) => {
+app.get("/api/v1/content", userMiddleware,async (req: Request, res: Response) => {
     //@ts-ignore
     const userId = req.userId;
 
@@ -135,7 +134,7 @@ app.get("/api/v1/content", userMiddleware,async (req, res) => {
 
 })
 
-app.delete("/api/v1/content", userMiddleware,async (req, res)=> {
+app.delete("/api/v1/content", userMiddleware,async (req: Request, res: Response)=> {
     const link = req.body.link;
 
     //@ts-ignore
@@ -162,7 +161,7 @@ app.delete("/api/v1/content", userMiddleware,async (req, res)=> {
 
 })
 
-app.post("/api/v1/brain/share", userMiddleware,async (req, res) => {
+app.post("/api/v1/brain/share", userMiddleware,async (req: Request, res: Response) => {
     const {share} = req.body
     if(share) {
 
@@ -233,7 +232,26 @@ app.get("/api/v1/brain/:shareLink", async (req, res)=> {
 
 })
 
+app.post("api/v1/user-meta-data", userMiddleware, async (req: Request, res: Response)=> {
 
+
+    try {
+        //@ts-ignore
+        const id = req.userId;
+        const userId = new mongoose.Types.ObjectId(id);
+       const userDetails = await UserModel.findOne({
+            _id: userId
+       })
+      
+       res.json({
+        username: userDetails?.username,
+        dateOfJoined: userDetails?.dateOfJoined
+       })
+        
+    }catch {
+            res.send("something went wrong!")
+    }
+})
 app.listen(process.env.PORT || PORT ,() => {
     console.log("server is listening on port");
 })

@@ -17,7 +17,14 @@ async function main() {
 
 const UserSchema = new Schema({
     username: {type: String, unique: true},
-    password: String    
+    password: String ,
+    dateOfJoined: {
+    type: String,
+    default: () => {
+      const today = new Date();
+      return today.toISOString().split('T')[0]; 
+    }
+  }
 })
 
 export const UserModel = mongoose.model("Users", UserSchema);
