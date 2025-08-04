@@ -19,12 +19,10 @@ const UserSchema = new Schema({
     username: {type: String, unique: true},
     password: String ,
     dateOfJoined: {
-    type: String,
-    default: () => {
-      const today = new Date();
-      return today.toISOString().split('T')[0]; 
+        type:Date,
+        default: Date.now,
     }
-  }
+  
 })
 
 export const UserModel = mongoose.model("Users", UserSchema);
