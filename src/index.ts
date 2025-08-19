@@ -1,6 +1,7 @@
 import express from "express";
 import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
+import bcrypt from "bcrypt"
 
 import { ObjectId } from "mongoose";
 import jwt from  "jsonwebtoken"; 
@@ -11,7 +12,7 @@ import { UserModel, ContentModel, LinkModel } from "./db";
 
 import { random } from "./utils";
 
-import { JWT_PASSWORD } from "./config";
+import { JWT_PASSWORD, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
 
 import dotenv from "dotenv"
@@ -27,14 +28,11 @@ app.use(cors());
 
 
 app.post("/api/v1/signup", async (req: Request, res: Response) => {
-   //TODO  //zod validation , hash password
-
-
-    const username = req.body.username;
-    const password = req.body.password;
-  
     try {
+         const username = req.body.username;
+         const password = req.body.password;
 
+         const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
          const existingUser = await UserModel.findOne({
             username
          })
@@ -47,14 +45,14 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
          }
          await UserModel.create({
             username: username,
-            password: password
+            password: hashedPassword
          })
          res.send({
             message: "you are signed up!"
          })
     }catch(err) {
-        res.status(404).json({
-            message: "something went away be cool!"
+        res.status(500).json({
+            message: "something went wrong!"
         })
         return;
         
@@ -63,31 +61,36 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
 
 app.post("/api/v1/signin", async (req: Request, res: Response) => {
 
-    const username = req.body.username;
-    const password = req.body.password;
+   try{
+            const username = req.body.username;
+            const password = req.body.password;
+            
 
-    const existingUser =  await UserModel.findOne({
-        username,
-        password
-    })
-    if(existingUser) {
-        if (!JWT_PASSWORD) {
-            res.status(500).json({ message: "Something went wrong bhai" });
-            return;
-        }
-        const token = jwt.sign({
-            id: existingUser._id
-        }, process.env.JWT_PASSWORD!);
+            const existingUser =  await UserModel.findOne({
+                username,
+            })
+            if(existingUser) {
+                const isPasswordValid = await bcrypt.compare(password, existingUser.password!);
 
-        res.status(200).json({
-            token
+               
+                const token = jwt.sign({
+                    id: existingUser._id
+                }, process.env.JWT_PASSWORD!, {expiresIn: "1d"});
+
+                res.status(200).json({
+                    token
+                })
+            }else{
+                res.status(401).json({
+                    message: "Invalid username or password"
+                })
+            }
+
+   }catch {
+        res.status(500).json({
+            message: "something went wrong!"
         })
-    }else{
-        res.status(401).json({
-            message: "Invalid username or password"
-        })
-    }
-
+   }
 
 
 
@@ -97,7 +100,7 @@ app.post("/api/v1/content", userMiddleware,async(req: Request, res: Response) =>
         const link = req.body.link;
         const title = req.body.title;
         const type = req.body.type
-        //@ts-ignore
+      
         const userId = req.userId;
 
         try {
@@ -105,7 +108,6 @@ app.post("/api/v1/content", userMiddleware,async(req: Request, res: Response) =>
                 title,
                 link,
                 type,
-                //@ts-ignore
                 userId
             })
         }catch(err){
@@ -121,7 +123,6 @@ app.post("/api/v1/content", userMiddleware,async(req: Request, res: Response) =>
 })
 
 app.get("/api/v1/content", userMiddleware,async (req: Request, res: Response) => {
-    //@ts-ignore
     const userId = req.userId;
 
     const content = await ContentModel.find({
@@ -137,7 +138,7 @@ app.get("/api/v1/content", userMiddleware,async (req: Request, res: Response) =>
 app.delete("/api/v1/content", userMiddleware,async (req: Request, res: Response)=> {
     const link = req.body.link;
 
-    //@ts-ignore
+
     const userId = req.userId;
     try {
            const response =    await ContentModel.deleteOne({
@@ -166,7 +167,6 @@ app.post("/api/v1/brain/share", userMiddleware,async (req: Request, res: Respons
     if(share) {
 
         const existingLink = await LinkModel.findOne({
-            //@ts-ignore
             userId: req.userId
         })
         if(existingLink) {
@@ -178,7 +178,6 @@ app.post("/api/v1/brain/share", userMiddleware,async (req: Request, res: Respons
         const hash = random(10);
 
        await  LinkModel.create({
-            //@ts-ignore
             userId: req.userId,
             hash: hash
        })
@@ -188,10 +187,10 @@ app.post("/api/v1/brain/share", userMiddleware,async (req: Request, res: Respons
 
     }else{
         await LinkModel.deleteOne({
-            //@ts-ignore
+          
             userId: req.userId
         });
-        //@ts-ignore
+        
         console.log(req.userId);
         res.json({
             message: "Removed Link!"
@@ -236,20 +235,24 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: Request, res: Res
 
 
     try {
-        //@ts-ignore
         const id = req.userId;
         const userId = new mongoose.Types.ObjectId(id);
        const userDetails = await UserModel.findOne({
             _id: userId
        })
-      
+         if(!userDetails) {
+                res.status(404).json({
+                 message: "User not found!"
+                })
+                return;
+         }
        res.json({
         username: userDetails?.username,
         dateOfJoined: userDetails?.dateOfJoined
        })
         
     }catch {
-            res.send("something went wrong!")
+            res.status(500).json("something went wrong!")
     }
 })
 app.listen(process.env.PORT || PORT ,() => {
