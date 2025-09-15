@@ -78,7 +78,8 @@ app.post("/api/v1/signin", async (req: Request, res: Response) => {
                 }, process.env.JWT_PASSWORD!, {expiresIn: "1d"});
 
                 res.status(200).json({
-                    token
+                    token: "Bearer " + token,
+                    message: "You are logged in!"
                 })
             }else{
                 res.status(401).json({
