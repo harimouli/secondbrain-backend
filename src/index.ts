@@ -3,6 +3,10 @@ import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
 
+// Extend Express Request interface to include userId
+
+import { AuthRequest } from "./middleware";
+
 import { ObjectId } from "mongoose";
 import jwt from  "jsonwebtoken"; 
 import cors from "cors"
@@ -16,6 +20,7 @@ import { JWT_PASSWORD, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
 
 import dotenv from "dotenv"
+import { verify } from "crypto";
 dotenv.config();
 
 const PORT  =  3000;
@@ -97,12 +102,12 @@ app.post("/api/v1/signin", async (req: Request, res: Response) => {
 
 })
 
-app.post("/api/v1/content", userMiddleware,async(req: Request, res: Response) => {
+app.post("/api/v1/content", userMiddleware,async(req: AuthRequest, res: Response) => {
         const link = req.body.link;
         const title = req.body.title;
         const type = req.body.type
-      
-        const userId = req.userId;
+
+        const userId = req?.userId;
 
         try {
             await ContentModel.create({
@@ -123,7 +128,7 @@ app.post("/api/v1/content", userMiddleware,async(req: Request, res: Response) =>
 
 })
 
-app.get("/api/v1/content", userMiddleware,async (req: Request, res: Response) => {
+app.get("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response) => {
     const userId = req.userId;
 
     const content = await ContentModel.find({
@@ -136,7 +141,7 @@ app.get("/api/v1/content", userMiddleware,async (req: Request, res: Response) =>
 
 })
 
-app.delete("/api/v1/content", userMiddleware,async (req: Request, res: Response)=> {
+app.delete("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response)=> {
     const link = req.body.link;
 
 
@@ -163,7 +168,7 @@ app.delete("/api/v1/content", userMiddleware,async (req: Request, res: Response)
 
 })
 
-app.post("/api/v1/brain/share", userMiddleware,async (req: Request, res: Response) => {
+app.post("/api/v1/brain/share", userMiddleware,async (req: AuthRequest, res: Response) => {
     const {share} = req.body
     if(share) {
 
@@ -232,7 +237,7 @@ app.get("/api/v1/brain/:shareLink", async (req, res)=> {
 
 })
 
-app.post("/api/v1/user-meta-data", userMiddleware, async (req: Request, res: Response)=> {
+app.post("/api/v1/user-meta-data", userMiddleware, async (req: AuthRequest, res: Response)=> {
 
 
     try {
@@ -255,6 +260,16 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: Request, res: Res
     }catch {
             res.status(500).json("something went wrong!")
     }
+})
+
+
+app.post("/api/v1/verify-login", userMiddleware ,async (req: AuthRequest, res: Response) => {
+    
+    res.status(201).send({
+        message: 
+        "verified!"
+    })
+    
 })
 app.listen(process.env.PORT || PORT ,() => {
     console.log("server is listening on port");

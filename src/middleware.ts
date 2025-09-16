@@ -1,13 +1,11 @@
 import { Request, Response, NextFunction } from "express"
 
                                 
-declare global {
-  namespace Express {
-    interface Request {
+
+    export interface AuthRequest extends Request {
       userId?: string;
     }
-  }
-}
+ 
 
 import dotenv from "dotenv"
 
@@ -17,24 +15,34 @@ import { JWT_PASSWORD } from "./config";
 
 import jwt from "jsonwebtoken";
 
-export const userMiddleware = (req: Request, res:Response, next: NextFunction) => {
+export const userMiddleware = (req: AuthRequest, res:Response, next: NextFunction) : void  => {
     const header = req.headers["authorization"];
     const authToken = header && header.split(" ")[1];
 
-    const decoded = jwt.verify(authToken as string, process.env.JWT_PASSWORD!) as { id: string };
 
-    
+    if(!authToken){
+         res.status(403).json({
+            message: "You are not logged in!"
+        })
+        return;
+    } 
 
-    if(decoded){
-        
-        req.userId = decoded.id
+    try {
+        const decoded = jwt.verify(authToken as string, process.env.JWT_PASSWORD!) as { id: string };
+        req.userId = decoded.id;
         next();
-    }
-    else{
+    } catch (error) {
         res.status(403).json({
             message: "You are not logged in!"
         })
-        
+        return;
+    }
+
+    if(!req?.userId){
+        res.status(403).json({
+            message: "You are not logged in!"
+        })
+        return;
     }
 }
 
