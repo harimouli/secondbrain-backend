@@ -27,7 +27,7 @@ const PORT  =  3000;
 const app = express();
 app.use(express.json())
 app.use(cors({
-    origin: ["http://localhost:5173", "https://secondbrain-frontend-gstt.vercel.app/"]
+    origin: ["http://localhost:5173" ,"http://localhost:3000/", "https://secondbrain-frontend-gstt.vercel.app/"]
 }));
 
 
@@ -82,7 +82,7 @@ app.post("/api/v1/signin", async (req: Request, res: Response) => {
                
                 const token = jwt.sign({
                     id: existingUser._id
-                }, process.env.JWT_PASSWORD!, {expiresIn: "1d"});
+                }, process.env.JWT_PASSWORD!, {expiresIn: "1m"});
 
                 res.status(200).json({
                     token: "Bearer " + token,
@@ -133,14 +133,22 @@ app.post("/api/v1/content", userMiddleware,async(req: AuthRequest, res: Response
 app.get("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response) => {
     const userId = req.userId;
 
-    const content = await ContentModel.find({
-        userId
-    }).populate("userId", "username");
 
-    res.json({
-        content
-    })
+    try {
+            const userId = req.userId;
+            const content = await ContentModel.find({
+                    userId
+                 }).populate("userId", "username");
 
+                res.status(200).json({
+                    content
+                })
+            }catch{
+                res.status(500).json({
+                    message: "Something went wrong!"
+                })
+            }
+      
 })
 
 app.delete("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response)=> {
@@ -153,14 +161,14 @@ app.delete("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Respo
                 link,
                 userId
             })
-          
-            res.json({
+
+            res.status(200).json({
                 message: "Deleted succesfully!"
             })
 
 
     }catch(err) {
-        res.json({
+        res.status(403).json({
             message: "Something went wrong!"
         })
     }
@@ -199,7 +207,7 @@ app.post("/api/v1/brain/share", userMiddleware,async (req: AuthRequest, res: Res
             userId: req.userId
         });
         
-        console.log(req.userId);
+      
         res.json({
             message: "Removed Link!"
         })
@@ -268,7 +276,7 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: AuthRequest, res:
 app.get("/api/v1/verifylogin", userMiddleware ,async (req: AuthRequest, res: Response) => {
     
 
-
+    
     res.status(201).send({
         message: "verified!"
     })
