@@ -27,7 +27,8 @@ const PORT  =  3000;
 const app = express();
 app.use(express.json())
 app.use(cors({
-    origin: ["http://localhost:5173" ,"http://localhost:3000/", "https://secondbrain-frontend-gstt.vercel.app/"]
+    origin: ["http://localhost:5173" , "https://secondbrain-frontend-gstt.vercel.app/"],
+    
 }));
 
 
@@ -44,8 +45,8 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
             username
          })
          if(existingUser) {
-            res.send({
-                message: "user already exists!"
+            res.status(201).send({
+                message: "user already exists! please signin"
             })
 
             return;
@@ -69,31 +70,36 @@ app.post("/api/v1/signup", async (req: Request, res: Response) => {
 app.post("/api/v1/signin", async (req: Request, res: Response) => {
 
    try{
-            const username = req.body.username;
-            const password = req.body.password;
-            
-
+            const username: string = req.body.username;
+            const password: string = req.body.password;
+            console.log(username, password);
             const existingUser =  await UserModel.findOne({
                 username,
             })
-            if(existingUser) {
-                const isPasswordValid = await bcrypt.compare(password, existingUser.password!);
 
+            if(!existingUser) {
+                res.status(401).json({
+                    message: "Invalid username or password!"
+                })
+                return;
+            }
+            
+            const isPasswordValid = await bcrypt.compare(password, existingUser.password!);
+            if(!isPasswordValid) {
+                res.status(401).json({
+                    message: "Invalid password! or username"
+                })
+                return;
+            }
                
                 const token = jwt.sign({
                     id: existingUser._id
-                }, process.env.JWT_PASSWORD!, {expiresIn: "1m"});
+                }, process.env.JWT_PASSWORD!, {expiresIn: "1d"});
 
                 res.status(200).json({
-                    token: "Bearer " + token,
+                    token: token ,
                     message: "You are logged in!"
                 })
-            }else{
-                res.status(401).json({
-                    message: "Invalid username or password"
-                })
-            }
-
    }catch {
         res.status(500).json({
             message: "something went wrong!"
@@ -275,9 +281,9 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: AuthRequest, res:
 
 app.get("/api/v1/verifylogin", userMiddleware ,async (req: AuthRequest, res: Response) => {
     
-
+    console.log("reached here");
     
-    res.status(201).send({
+    res.status(200).send({
         message: "verified!"
     })
     

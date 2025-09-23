@@ -14,6 +14,7 @@ dotenv.config();
 import { JWT_PASSWORD } from "./config";
 
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 export const userMiddleware =  async (req: AuthRequest, res:Response, next: NextFunction) : Promise<void>  => {
     
@@ -22,9 +23,8 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
 
 
          const header = req.headers["authorization"];
-    const authToken = header && header.split(" ")[1];
-
-
+        const authToken = header && header.split(" ")[1];
+       
     if(!authToken){
          res.status(403).json({
             message: "You are not logged in!"
@@ -32,6 +32,7 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
         return;
     } 
         const decoded = jwt.verify(authToken as string, process.env.JWT_PASSWORD!) as { id: string };
+      
         if(!decoded) {
             res.status(403).json({
                 message: "You are not logged in!"
@@ -39,7 +40,9 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
             return;
         }
         req.userId = decoded.id;
-        const user = await UserModel.findById(req.userId);
+        const userId = new mongoose.Types.ObjectId(decoded.id);
+        const user = await UserModel.findOne({ _id: userId });
+        console.log(user);
         if(!user) {
             res.status(401).json({
                 message: "You are not logged in!"
@@ -51,7 +54,7 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
         res.status(403).json({
             message: "something went wrong!"
         })
-        return;
+        return; 
     }
 
 }
