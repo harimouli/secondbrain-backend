@@ -26,7 +26,7 @@ const PORT  =  3000;
 const app = express();
 app.use(express.json())
 app.use(cors({
-    origin: ["http://localhost:5173" , "https://secondbrain-frontend-gstt.vercel.app/", "https://secondbrain-frontend-snowy.vercel.app/"],
+    origin: ["http://localhost:5173" , "https://secondbrain-frontend-gstt.vercel.app", "https://secondbrain-frontend-snowy.vercel.app"],
     
 }));
 
