@@ -23,7 +23,7 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
 
 
          const header = req.headers["authorization"];
-        const authToken = header && header.split(" ")[1];
+        const authToken = header && header.split(" ")[1];   
        
     if(!authToken){
          res.status(403).json({

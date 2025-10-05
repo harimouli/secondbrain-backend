@@ -281,7 +281,7 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: AuthRequest, res:
 
 app.get("/api/v1/verifylogin", userMiddleware ,async (req: AuthRequest, res: Response) => {
     
-    console.log("reached here");
+   
     
     res.status(200).send({
         message: "verified!"
