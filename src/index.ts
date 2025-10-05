@@ -10,7 +10,7 @@ import { AuthRequest } from "./middleware";
 import { ObjectId } from "mongoose";
 import jwt from  "jsonwebtoken"; 
 import cors from "cors"
-import { json } from "express/lib/response";
+
 
 import { UserModel, ContentModel, LinkModel } from "./db"; 
 
@@ -19,15 +19,14 @@ import { random } from "./utils";
 import { JWT_PASSWORD, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
 
-import dotenv from "dotenv"
-import { verify } from "crypto";
+import dotenv from "dotenv";
 dotenv.config();
 
 const PORT  =  3000;
 const app = express();
 app.use(express.json())
 app.use(cors({
-    origin: ["http://localhost:5173" , "https://secondbrain-frontend-gstt.vercel.app/"],
+    origin: ["http://localhost:5173" , "https://secondbrain-frontend-gstt.vercel.app/", "https://secondbrain-frontend-snowy.vercel.app/"],
     
 }));
 
