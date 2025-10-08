@@ -71,7 +71,7 @@ app.post("/api/v1/signin", async (req: Request, res: Response) => {
    try{
             const username: string = req.body.username;
             const password: string = req.body.password;
-            console.log(username, password);
+        
             const existingUser =  await UserModel.findOne({
                 username,
             })
@@ -136,7 +136,7 @@ app.post("/api/v1/content", userMiddleware,async(req: AuthRequest, res: Response
 })
 
 app.get("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response) => {
-    const userId = req.userId;
+    const userId: mongoose.Types.ObjectId | undefined = req.userId;
 
 
     try {
@@ -158,9 +158,7 @@ app.get("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response
 
 app.delete("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Response)=> {
     const link = req.body.link;
-
-
-    const userId = req.userId;
+    const   userId: mongoose.Types.ObjectId | undefined=  req?.userId;
     try {
            const response =    await ContentModel.deleteOne({
                 link,
@@ -185,6 +183,7 @@ app.delete("/api/v1/content", userMiddleware,async (req: AuthRequest, res: Respo
 
 app.post("/api/v1/brain/share", userMiddleware,async (req: AuthRequest, res: Response) => {
     const {share} = req.body
+      const   userId: mongoose.Types.ObjectId | undefined=  req?.userId;
     if(share) {
 
         const existingLink = await LinkModel.findOne({
@@ -209,7 +208,7 @@ app.post("/api/v1/brain/share", userMiddleware,async (req: AuthRequest, res: Res
     }else{
         await LinkModel.deleteOne({
           
-            userId: req.userId
+            userId:userId
         });
         
       
@@ -223,7 +222,7 @@ app.post("/api/v1/brain/share", userMiddleware,async (req: AuthRequest, res: Res
 
 app.get("/api/v1/brain/:shareLink", async (req, res)=> {
         const hash = req.params.shareLink;
-    
+      
     const link = await LinkModel.findOne({
         hash
     })
@@ -256,8 +255,7 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: AuthRequest, res:
 
 
     try {
-        const id = req.userId;
-        const userId = new mongoose.Types.ObjectId(id);
+          const   userId: mongoose.Types.ObjectId | undefined=  req?.userId;
        const userDetails = await UserModel.findOne({
             _id: userId
        })

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express"
                                 
 import { UserModel } from "./db";
     export interface AuthRequest extends Request {
-      userId?: string;
+      userId?: mongoose.Types.ObjectId;
     }
  
 
@@ -15,6 +15,7 @@ import { JWT_PASSWORD } from "./config";
 
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { decode } from "punycode";
 
 export const userMiddleware =  async (req: AuthRequest, res:Response, next: NextFunction) : Promise<void>  => {
     
@@ -31,18 +32,19 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
         })
         return;
     } 
-        const decoded = jwt.verify(authToken as string, process.env.JWT_PASSWORD!) as { id: string };
-      
+        const decoded: { id: string } = jwt.verify(authToken as string, process.env.JWT_PASSWORD!) as { id: string };
+        
         if(!decoded) {
             res.status(403).json({
                 message: "You are not logged in!"
             })
             return;
         }
-        req.userId = decoded.id;
+        const id:string  = decoded.id;
         const userId = new mongoose.Types.ObjectId(decoded.id);
+        req.userId = userId;   
         const user = await UserModel.findOne({ _id: userId });
-        console.log(user);
+     
         if(!user) {
             res.status(401).json({
                 message: "You are not logged in!"
