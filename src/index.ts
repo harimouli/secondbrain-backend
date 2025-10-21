@@ -2,8 +2,12 @@ import express from "express";
 import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
+import {  UserSchema } from "./db";
+import {type InferSchemaType } from "mongoose";
 
 // Extend Express Request interface to include userId
+type UserType = InferSchemaType<typeof UserSchema>;
+
 
 import { AuthRequest } from "./middleware";
 
@@ -256,7 +260,7 @@ app.post("/api/v1/user-meta-data", userMiddleware, async (req: AuthRequest, res:
 
     try {
           const   userId: mongoose.Types.ObjectId | undefined=  req?.userId;
-       const userDetails = await UserModel.findOne({
+       const userDetails: UserType | null = await UserModel.findOne({
             _id: userId
        })
          if(!userDetails) {
@@ -284,7 +288,26 @@ app.get("/api/v1/verifylogin", userMiddleware ,async (req: AuthRequest, res: Res
         message: "verified!"
     })
     
+});
+
+app.post("/api/v1/change-password", userMiddleware, async (req: AuthRequest, res:Response) => {
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+    const userId: mongoose.Types.ObjectId | undefined = req.userId;
+    try {
+          const userId: mongoose.Types.ObjectId | undefined = req.userId;
+          const user: UserType | null  = await UserModel.findOne( {
+            _id: userId
+          });
+
+
+    }catch {
+
+    }
+
 })
+
+
 app.listen(process.env.PORT || PORT ,() => {
     console.log("server is listening on port");
 })

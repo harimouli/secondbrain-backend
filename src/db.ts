@@ -15,7 +15,7 @@ async function main() {
     
 }
 
-const UserSchema = new Schema({
+export const UserSchema = new Schema({
     username: {type: String, unique: true},
     password: String ,
     dateOfJoined: {

@@ -45,7 +45,7 @@ export const userMiddleware =  async (req: AuthRequest, res:Response, next: Next
         req.userId = userId;   
         const user = await UserModel.findOne({ _id: userId });
      
-        if(!user) {
+        if(!user) { 
             res.status(401).json({
                 message: "You are not logged in!"
             })
