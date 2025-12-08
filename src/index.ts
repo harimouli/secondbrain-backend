@@ -16,7 +16,7 @@ import cors from "cors";
 
 import { UserModel, ContentModel, LinkModel } from "./db";
 
-import { random } from "./utils";
+import { generateUrlHash } from "./utils";
 
 import { JWT_PASSWORD, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
@@ -31,7 +31,6 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://secondbrain-frontend-gstt.vercel.app",
       "https://secondbrain-frontend-snowy.vercel.app",
     ],
   }),
@@ -205,14 +204,14 @@ app.post(
         });
         return;
       }
-      const hash = random(10);
+      const hash = generateUrlHash(6);
 
       await LinkModel.create({
         userId: req.userId,
         hash: hash,
       });
       res.status(200).json({
-        hash: hash,
+        hash: `https://secondbrain-frontend-snowy.vercel.app/${hash}`,
       });
     } else {
       await LinkModel.deleteOne({
