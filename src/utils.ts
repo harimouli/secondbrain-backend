@@ -1,12 +1,9 @@
-export const random = (len: number): string => {
-  const options: string =
-    "ejhdsmvbdfkhdfjfaqrkcfh+ghjtyhikjuyio2368695356783457890";
-  let length: number = options.length;
+import base62 from "base62";
+import crypto from "crypto";
 
-  let randomText: string = "";
+export const generateUrlHash = (len: number): string => {
+  const randomBytes = crypto.randomBytes(6).readUIntBE(0, 6);
+  let hash = base62.encode(randomBytes % 62 ** len);
 
-  for (let i = 0; i < len; i++) {
-    randomText += options[Math.floor(Math.random() * length)]; // 0 => 20
-  }
-  return randomText;
+  return hash.padStart(len, "0");
 };
