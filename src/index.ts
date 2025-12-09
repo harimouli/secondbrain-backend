@@ -18,7 +18,7 @@ import { UserModel, ContentModel, LinkModel } from "./db";
 
 import { generateUrlHash } from "./utils";
 
-import { JWT_PASSWORD, SALT_ROUNDS } from "./config";
+import { JWT_SECRET, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
 
 import dotenv from "dotenv";
@@ -78,7 +78,7 @@ app.post("/api/v1/signin", async (req: Request, res: Response) => {
 
     if (!existingUser) {
       res.status(401).json({
-        message: "Invalid username or password!",
+        message: "Invalid username or password",
       });
       return;
     }
@@ -98,12 +98,19 @@ app.post("/api/v1/signin", async (req: Request, res: Response) => {
       {
         id: existingUser._id,
       },
-      process.env.JWT_PASSWORD!,
+      JWT_SECRET,
       { expiresIn: "1d" },
     );
 
     res.status(200).json({
       token: token,
+
+      userDetails: {
+        username: existingUser.username,
+        dateOfJoined: existingUser.dateOfJoined,
+        isShareEnabled: existingUser.isShareEnabled,
+      },
+
       message: "You are logged in!",
     });
   } catch {
