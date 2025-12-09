@@ -13,7 +13,6 @@ import { JWT_SECRET } from "./config";
 
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import { decode } from "punycode";
 
 export const userMiddleware = async (
   req: AuthRequest,

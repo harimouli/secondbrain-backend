@@ -220,6 +220,7 @@ app.post(
       });
       res.status(200).json({
         hash: `https://secondbrain-frontend-snowy.vercel.app/${hash}`,
+        isShareEnabled: true,
       });
     } else {
       await UserModel.updateOne({ _id: userId }, { isShareEnabled: false });
