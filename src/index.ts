@@ -200,6 +200,7 @@ app.post(
   userMiddleware,
   async (req: AuthRequest, res: Response) => {
     const { isPublic } = req.body;
+
     const userId: mongoose.Types.ObjectId | undefined = req?.userId;
     if (isPublic) {
       const existingLink = await LinkModel.findOne({
@@ -212,7 +213,7 @@ app.post(
         return;
       }
       const hash = generateUrlHash(6);
-
+      await UserModel.updateOne({ _id: userId }, { isShareEnabled: true });
       await LinkModel.create({
         userId: req.userId,
         hash: hash,
@@ -221,12 +222,14 @@ app.post(
         hash: `https://secondbrain-frontend-snowy.vercel.app/${hash}`,
       });
     } else {
+      await UserModel.updateOne({ _id: userId }, { isShareEnabled: false });
       await LinkModel.deleteOne({
         userId: userId,
       });
 
       res.status(200).json({
         message: "Removed Link!",
+        isShareEnabled: false,
       });
     }
   },
