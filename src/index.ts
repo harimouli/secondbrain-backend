@@ -228,10 +228,16 @@ app.post(
         isShareEnabled: true,
       });
     } else {
-      await UserModel.findOneAndUpdate(
+      const updatedUser = await UserModel.findOneAndUpdate(
         { _id: req.userId },
         { isShareEnabled: isPublic },
       );
+      if (!updatedUser) {
+        res.status(404).json({
+          message: "User not found!",
+        });
+        return;
+      }
       await LinkModel.deleteOne({
         userId: userId,
       });
