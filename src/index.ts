@@ -243,6 +243,7 @@ app.post(
       });
 
       res.status(200).json({
+        hash: "",
         message: "Removed Link!",
         isShareEnabled: false,
       });
@@ -278,31 +279,6 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
     content,
   });
 });
-
-app.post(
-  "/api/v1/user-meta-data",
-  userMiddleware,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const userId: mongoose.Types.ObjectId | undefined = req?.userId;
-      const userDetails: UserType | null = await UserModel.findOne({
-        _id: userId,
-      });
-      if (!userDetails) {
-        res.status(404).json({
-          message: "User not found!",
-        });
-        return;
-      }
-      res.json({
-        username: userDetails?.username,
-        dateOfJoined: userDetails?.dateOfJoined,
-      });
-    } catch {
-      res.status(500).json("something went wrong!");
-    }
-  },
-);
 
 app.get(
   "/api/v1/verifylogin",
