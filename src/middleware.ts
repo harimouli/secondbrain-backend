@@ -32,7 +32,7 @@ export const userMiddleware = async (
     }
     const decoded: { id: string } = jwt.verify(
       authToken as string,
-      process.env.JWT_PASSWORD!,
+      JWT_SECRET!,
     ) as { id: string };
 
     if (!decoded) {
