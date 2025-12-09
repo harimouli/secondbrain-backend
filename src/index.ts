@@ -208,13 +208,17 @@ app.post(
       });
       if (existingLink) {
         res.status(200).json({
-          hash: existingLink.hash,
-          isShareEnabled: true,
+          hash: `https://secondbrain-frontend-snowy.vercel.app/${existingLink.hash}`,
+          isShareEnabled: isPublic,
         });
         return;
       }
       const hash = generateUrlHash(6);
-      await UserModel.updateOne({ _id: userId }, { isShareEnabled: true });
+      await UserModel.findOneAndUpdate(
+        { _id: userId },
+        { isShareEnabled: isPublic },
+      );
+
       await LinkModel.create({
         userId: req.userId,
         hash: hash,
@@ -224,7 +228,10 @@ app.post(
         isShareEnabled: true,
       });
     } else {
-      await UserModel.updateOne({ _id: userId }, { isShareEnabled: false });
+      await UserModel.findOneAndUpdate(
+        { _id: req.userId },
+        { isShareEnabled: isPublic },
+      );
       await LinkModel.deleteOne({
         userId: userId,
       });
