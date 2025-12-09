@@ -7,8 +7,22 @@ dotenv.config();
 interface User {
   username: string;
   password: string;
-  activeShare?: boolean;
+  isShareEnabled?: boolean;
   dateOfJoined?: Date;
+}
+
+interface Content {
+  title: string;
+  link: string;
+  type: string;
+  share?: boolean;
+  tags?: mongoose.Types.ObjectId[];
+  userId: mongoose.Types.ObjectId;
+}
+
+interface Link {
+  hash: string;
+  userId: mongoose.Types.ObjectId;
 }
 
 async function main() {
@@ -22,7 +36,7 @@ async function main() {
 export const UserSchema = new Schema<User>({
   username: { type: String, unique: true },
   password: String,
-  activeShare: { type: Boolean, default: false },
+  isShareEnabled: { type: Boolean, default: false },
   dateOfJoined: {
     type: Date,
     default: Date.now,
