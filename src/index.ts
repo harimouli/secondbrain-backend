@@ -209,6 +209,7 @@ app.post(
       if (existingLink) {
         res.status(200).json({
           hash: existingLink.hash,
+          isShareEnabled: true,
         });
         return;
       }
