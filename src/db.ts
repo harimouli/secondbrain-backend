@@ -20,7 +20,7 @@ interface Content {
   userId: mongoose.Types.ObjectId;
 }
 
-interface Link {
+export interface Link {
   hash: string;
   userId: mongoose.Types.ObjectId;
 }

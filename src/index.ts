@@ -8,6 +8,7 @@ import { type InferSchemaType } from "mongoose";
 // Extend Express Request interface to include userId
 type UserType = InferSchemaType<typeof UserSchema>;
 
+import { Link } from "./db";
 import { AuthRequest } from "./middleware";
 
 import { ObjectId } from "mongoose";
@@ -22,6 +23,7 @@ import { JWT_SECRET, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
 
 import dotenv from "dotenv";
+import { get } from "http";
 dotenv.config();
 
 const PORT = 3000;
@@ -199,53 +201,91 @@ app.post(
   "/api/v1/brain/share-url",
   userMiddleware,
   async (req: AuthRequest, res: Response) => {
-    const { isPublic } = req.body;
+    try {
+      const { isPublic } = req.body;
+      if (isPublic) {
+        // checking user preference to enable sharing functionality..lol
 
-    const userId: mongoose.Types.ObjectId | undefined = req?.userId;
-    if (isPublic) {
-      const existingLink = await LinkModel.findOne({
-        userId: req.userId,
-      });
-      if (existingLink) {
-        res.status(200).json({
-          hash: `https://secondbrain-frontend-snowy.vercel.app/${existingLink.hash}`,
-          isShareEnabled: isPublic,
+        const existingLink: Link | null = await LinkModel.findOne({
+          // checking if link aleady existing in link collections
+          userId: req.userId,
         });
-        return;
-      }
-      const hash = generateUrlHash(6);
-      await UserModel.findOneAndUpdate(
-        { _id: userId },
-        { isShareEnabled: isPublic },
-      );
 
-      await LinkModel.create({
-        userId: req.userId,
-        hash: hash,
-      });
-      res.status(200).json({
-        hash: `https://secondbrain-frontend-snowy.vercel.app/${hash}`,
-        isShareEnabled: true,
-      });
-    } else {
-      const updatedUser = await UserModel.findOneAndUpdate(
-        { _id: req.userId },
-        { isShareEnabled: isPublic },
-      );
-      if (!updatedUser) {
-        res.status(404).json({
-          message: "User not found!",
-        });
-        return;
-      }
-      await LinkModel.deleteOne({
-        userId: userId,
-      });
+        if (existingLink) {
+          // if link already existis in db , then we are just returning that link .. lol
+          res.status(200).json({
+            hash: `https://secondbrain-frontend-snowy.vercel.app/brain/${existingLink.hash}`,
+            isShareEnabled: true,
+          });
+          return;
+        }
 
-      res.status(200).json({
-        hash: "",
-        message: "Removed Link!",
+        const session = await mongoose.startSession();
+        try {
+          const hash: string = generateUrlHash(6); // here iam genertaing colison free hash using base62 encoding + crypto random bytes..lol
+
+          session.startTransaction(); // created a transaction for db consistency
+
+          await UserModel.findByIdAndUpdate(
+            { _id: req.userId },
+            { isShareEnabled: true },
+            { session },
+          ); // enabling sharing functionality for user in user collection..lol
+          await LinkModel.create([{ hash, userId: req.userId }], { session }); // creating new link in link collection
+          await session.commitTransaction();
+          session.endSession();
+
+          res.status(200).json({
+            hash: `https://secondbrain-frontend-snowy.vercel.app/brain/${hash}`,
+            isShareEnabled: true,
+            message: "Your link is live now!",
+          });
+        } catch (err) {
+          session.abortTransaction();
+          session.endSession();
+          res.status(500).json({
+            hash: "",
+            isShareEnabled: false,
+            message: "Something went wrong!",
+          });
+        }
+      }
+      // if user wants to disable sharing functionality , they can do so this way ..lol
+      else {
+        const session = await mongoose.startSession();
+
+        try {
+          session.startTransaction();
+
+          await UserModel.findOneAndUpdate(
+            { _id: req.userId },
+            { isShareEnabled: false },
+            { session },
+          );
+
+          await LinkModel.deleteOne({ userId: req.userId }, { session });
+          session.commitTransaction();
+          session.endSession();
+          res.status(200).json({
+            hash: null,
+            isShareEnabled: false,
+            message: "Sharing disabled successfully!",
+          });
+        } catch (err) {
+          session.abortTransaction();
+          session.endSession();
+          res.status(500).json({
+            hash: null,
+            isShareEnabled: true,
+            message: "Something went wrong!",
+          });
+        }
+      }
+    } catch {
+      res.status(500).json({
+        hash: null,
         isShareEnabled: false,
+        message: "Something went wrong!",
       });
     }
   },
