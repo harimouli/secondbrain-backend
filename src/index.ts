@@ -214,7 +214,7 @@ app.post(
         if (existingLink) {
           // if link already existis in db , then we are just returning that link .. lol
           res.status(200).json({
-            hash: `https://secondbrain-frontend-snowy.vercel.app/brain/${existingLink.hash}`,
+            hash: `https://secondbrain-frontend-snowy.vercel.app/mind/${existingLink.hash}`,
             isShareEnabled: true,
           });
           return;
@@ -236,7 +236,7 @@ app.post(
           session.endSession();
 
           res.status(200).json({
-            hash: `https://secondbrain-frontend-snowy.vercel.app/brain/${hash}`,
+            hash: `https://secondbrain-frontend-snowy.vercel.app/mind/${hash}`,
             isShareEnabled: true,
             message: "Your link is live now!",
           });
