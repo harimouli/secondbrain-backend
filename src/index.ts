@@ -198,7 +198,7 @@ app.delete(
 );
 
 app.post(
-  "/api/v1/brain/share-url",
+  "/api/v1/mind/share-url",
   userMiddleware,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -241,7 +241,7 @@ app.post(
             message: "Your link is live now!",
           });
         } catch (err) {
-          session.abortTransaction();
+          await session.abortTransaction();
           session.endSession();
           res.status(500).json({
             hash: "",
@@ -264,7 +264,7 @@ app.post(
           );
 
           await LinkModel.deleteOne({ userId: req.userId }, { session });
-          session.commitTransaction();
+          await session.commitTransaction();
           session.endSession();
           res.status(200).json({
             hash: null,
@@ -272,11 +272,11 @@ app.post(
             message: "Sharing disabled successfully!",
           });
         } catch (err) {
-          session.abortTransaction();
+          await session.abortTransaction();
           session.endSession();
           res.status(500).json({
             hash: null,
-            isShareEnabled: true,
+            isShareEnabled: null, // or omit - state is unknown after failure
             message: "Something went wrong!",
           });
         }
@@ -291,7 +291,7 @@ app.post(
   },
 );
 
-app.get("/api/v1/brain/:shareLink", async (req, res) => {
+app.get("/api/v1/mind/:shareLink", async (req, res) => {
   const hash = req.params.shareLink;
 
   const link = await LinkModel.findOne({
