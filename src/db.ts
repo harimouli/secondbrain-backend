@@ -6,6 +6,7 @@ dotenv.config();
 
 interface User {
   username: string;
+  email: string;
   password: string;
   isShareEnabled?: boolean;
   dateOfJoined?: Date;
@@ -34,6 +35,7 @@ async function main() {
 }
 
 export const UserSchema = new Schema<User>({
+  email: { type: String, unique: true },
   username: { type: String, unique: true },
   password: String,
   isShareEnabled: { type: Boolean, default: false },
