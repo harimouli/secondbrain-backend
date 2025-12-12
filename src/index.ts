@@ -5,14 +5,17 @@ import bcrypt from "bcrypt";
 import { UserSchema } from "./db";
 import { type InferSchemaType } from "mongoose";
 
-// Extend Express Request interface to include userId
+import { requestRateLimiter } from "./middleware/ratelimiter";
+
+import { authRateLimiter } from "./middleware/authRateLimiter";
+
 type UserType = InferSchemaType<typeof UserSchema>;
 
 import { Link } from "./db";
 import { AuthRequest } from "./middleware";
 
 import { ObjectId } from "mongoose";
-import jwt from "jsonwebtoken";
+
 import cors from "cors";
 
 import { UserModel, ContentModel, LinkModel } from "./db";
@@ -21,14 +24,16 @@ import { generateUrlHash } from "./utils";
 
 import { JWT_SECRET, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
-
+import authRouter from "./routes/auth.routes";
 import dotenv from "dotenv";
-import { get } from "http";
+
 dotenv.config();
 
 const PORT = 3000;
 const app = express();
 app.use(express.json());
+
+app.use(requestRateLimiter);
 app.use(
   cors({
     origin: [
@@ -38,89 +43,7 @@ app.use(
   }),
 );
 
-app.post("/api/v1/signup", async (req: Request, res: Response) => {
-  try {
-    const username = req.body.username;
-    const password = req.body.password;
-
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    const existingUser = await UserModel.findOne({
-      username,
-    });
-    if (existingUser) {
-      res.status(201).send({
-        message: "user already exists! please signin",
-      });
-
-      return;
-    }
-    await UserModel.create({
-      username: username,
-      password: hashedPassword,
-    });
-    res.send({
-      message: "you are signed up!",
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "something went wrong!",
-    });
-    return;
-  }
-});
-
-app.post("/api/v1/signin", async (req: Request, res: Response) => {
-  try {
-    const username: string = req.body.username;
-    const password: string = req.body.password;
-
-    const existingUser = await UserModel.findOne({
-      username,
-    });
-
-    if (!existingUser) {
-      res.status(401).json({
-        message: "Invalid username or password",
-      });
-      return;
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      existingUser.password!,
-    );
-    if (!isPasswordValid) {
-      res.status(401).json({
-        message: "Invalid password! or username",
-      });
-      return;
-    }
-
-    const token = jwt.sign(
-      {
-        id: existingUser._id,
-      },
-      JWT_SECRET,
-      { expiresIn: "1d" },
-    );
-
-    res.status(200).json({
-      token: token,
-
-      userDetails: {
-        username: existingUser.username,
-        dateOfJoined: existingUser.dateOfJoined,
-        isShareEnabled: existingUser.isShareEnabled,
-      },
-
-      message: "You are logged in!",
-    });
-  } catch {
-    res.status(500).json({
-      message: "something went wrong!",
-    });
-  }
-});
+app.use("/api/v1/auth", authRateLimiter, authRouter);
 
 app.post(
   "/api/v1/content",
@@ -141,12 +64,14 @@ app.post(
       });
     } catch (err) {
       res.status(501).json({
+        success: false,
         message: "Something went wrong!",
       });
     }
 
-    res.status(200).json({
-      message: "Content added!",
+    res.status(201).json({
+      success: true,
+      message: "Content added successfully!",
     });
   },
 );
@@ -198,7 +123,7 @@ app.delete(
 );
 
 app.post(
-  "/api/v1/mind/share-url",
+  "/api/v1/mind/shareurl",
   userMiddleware,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -291,33 +216,50 @@ app.post(
   },
 );
 
-app.get("/api/v1/mind/:shareLink", async (req, res) => {
-  const hash = req.params.shareLink;
+// endpoint to fetch shared content using shareable link .. lol
 
-  const link = await LinkModel.findOne({
-    hash,
-  });
+app.get("/api/v1/mind/:sharelink", async (req, res) => {
+  const sharelink = req.params.sharelink; // extracting shareable link from params
 
-  if (!link) {
-    res.status(404).json({
-      message: "Sorry incorrect input!",
+  try {
+    const linkDoc = await LinkModel.findOne({
+      // finding link document from link collection using the hash
+      hash: sharelink,
     });
-    return;
-  }
-  const userId = link.userId;
-  const content = await ContentModel.find({
-    userId,
-  }).populate("userId", "username");
-  /*if(!user) {
-        res.status(411).json({
-            message: "user not found , should ideally not happen!"  
-        })
-        return;
-    } */
 
-  res.status(200).json({
-    content,
-  });
+    if (!linkDoc) {
+      // if no link found return 404
+      res.status(404).json({
+        message: "Shared link not found!",
+      });
+      return;
+    }
+
+    const userId = linkDoc.userId; // extracting userId from link document
+
+    const sharedContent = await ContentModel.find({
+      // finding all content associated with that userId
+      userId: userId,
+    });
+
+    if (sharedContent.length === 0) {
+      res.status(204).json({
+        sharedContent: [],
+        message: "No shared content found!",
+      });
+      return; // no content to share
+    }
+
+    res.status(200).json({
+      sharedContent,
+      message: "Shared content fetched successfully!", // successfully fetched shared content
+    });
+  } catch (err) {
+    res.status(500).json({
+      // internal server error
+      message: "Something went wrong!",
+    });
+  }
 });
 
 app.get(
@@ -327,38 +269,6 @@ app.get(
     res.status(200).send({
       message: "verified!",
     });
-  },
-);
-
-app.post(
-  "/api/v1/change-password",
-  userMiddleware,
-  async (req: AuthRequest, res: Response) => {
-    const oldPassword = req.body.oldPassword;
-    const newPassword = req.body.newPassword;
-    const userId: mongoose.Types.ObjectId | undefined = req.userId;
-    try {
-      const userId: mongoose.Types.ObjectId | undefined = req.userId;
-      const user: UserType | null = await UserModel.findOne({
-        _id: userId,
-      });
-      if (!user) {
-        res.status(404).json({
-          message: "User not found!",
-        });
-      }
-      const isPasswordValid = await bcrypt.compare(
-        oldPassword,
-        user!.password!,
-      );
-      if (!isPasswordValid) {
-        res.status(401).json({
-          message: "Old password is incorrect!",
-        });
-        return;
-      }
-      const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
-    } catch {}
   },
 );
 
