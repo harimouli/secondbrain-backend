@@ -44,9 +44,9 @@ export const signupController = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      res.status(201).json({
-        success: true,
-        message: "user already exists! please signin",
+      res.status(409).json({
+        success: false,
+        message: "Unable to create account",
       });
 
       return;
@@ -57,7 +57,7 @@ export const signupController = async (req: Request, res: Response) => {
     });
     res.status(201).json({
       success: true,
-      message: "you are signed man! please signin",
+      message: "you are signed up! please signin",
     });
   } catch (err) {
     res.status(500).json({
@@ -100,7 +100,7 @@ export const signinController = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
-        message: "Invalid password! or username",
+        message: "Invalid password or username",
       });
       return;
     }
