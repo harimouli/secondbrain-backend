@@ -4,8 +4,9 @@ const { Schema } = mongoose;
 interface RefreshToken {
   token: string;
   userId: mongoose.Types.ObjectId;
+  expiresAt: Date;
+  isRevoked?: boolean;
 }
-
 const RefreshTokenSchema = new Schema<RefreshToken>({
   token: { type: String, required: true },
   userId: {
@@ -13,6 +14,15 @@ const RefreshTokenSchema = new Schema<RefreshToken>({
     ref: "Users",
     required: true,
     index: true,
+  },
+  expiresAt: {
+    type: Date,
+    required: true,
+    index: true,
+  },
+  isRevoked: {
+    type: Boolean,
+    default: false,
   },
 });
 

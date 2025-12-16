@@ -6,7 +6,7 @@ export interface Link {
 }
 
 const LinkSchema = new Schema<Link>({
-  hash: { type: String, unique: true },
+  hash: { type: String, unique: true, required: true },
   userId: {
     type: Schema.Types.ObjectId,
     ref: "Users",
