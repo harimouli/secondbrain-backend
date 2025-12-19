@@ -1,32 +1,26 @@
 import express from "express";
 import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
-import { UserSchema } from "./db";
-import { type InferSchemaType } from "mongoose";
 
 import { requestRateLimiter } from "./middleware/ratelimiter";
 
 import { authRateLimiter } from "./middleware/authRateLimiter";
 
-type UserType = InferSchemaType<typeof UserSchema>;
-
-import { Link } from "./db";
+import { Link } from "./models/link.model";
 import { AuthRequest } from "./middleware";
-
-import { ObjectId } from "mongoose";
 
 import cors from "cors";
 
-import { UserModel, ContentModel, LinkModel } from "./db";
+import { UserModel } from "./models/user.model";
+import { ContentModel } from "./models/content.model";
+import { LinkModel } from "./models/link.model";
 
 import { generateUrlHash } from "./utils";
-
-import { JWT_SECRET, SALT_ROUNDS } from "./config";
 import { userMiddleware } from "./middleware";
 import authRouter from "./routes/auth.routes";
-import dotenv from "dotenv";
+import connectDB from "./config/db";
 
+import dotenv from "dotenv";
 dotenv.config();
 
 const PORT = 3000;
@@ -271,6 +265,8 @@ app.get(
     });
   },
 );
+
+connectDB();
 
 app.listen(process.env.PORT || PORT, () => {
   console.log("server is listening on port");
