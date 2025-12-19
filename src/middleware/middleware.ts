@@ -25,11 +25,14 @@ export const userMiddleware = async (
       });
       return;
     }
+    if (!ACESS_TOKEN_SECRET) {
+      throw new Error("ACCESS_TOKEN_SECRET is not configured");
+    }
+
     const decoded: { userId: string } = jwt.verify(
       authToken as string,
-      ACESS_TOKEN_SECRET!,
-    ) as { userId: string }; // this either gets decoded or it will throw error.. /lol
-
+      ACESS_TOKEN_SECRET,
+    ) as { userId: string };
     const id: string = decoded.userId;
     const userId = new mongoose.Types.ObjectId(decoded.userId);
     req.userId = userId;
