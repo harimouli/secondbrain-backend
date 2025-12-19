@@ -5,10 +5,10 @@ dotenv.config();
 
 async function connectDB() {
   const mongoUrl = process.env.MONGO_URL;
-  console.log("Connecting to MongoDB...");
   if (!mongoUrl) {
-    throw new Error("MONGO_URL environment variable is not bhai");
+    throw new Error("MONGO_URL environment variable is not set");
   }
+  console.log("Connecting to MongoDB...");
   await mongoose.connect(mongoUrl);
 }
 
