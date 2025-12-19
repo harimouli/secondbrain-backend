@@ -7,7 +7,7 @@ import { requestRateLimiter } from "./middleware/ratelimiter";
 import { authRateLimiter } from "./middleware/authRateLimiter";
 
 import { Link } from "./models/link.model";
-import { AuthRequest } from "./middleware";
+import { AuthRequest } from "./middleware/middleware";
 
 import cors from "cors";
 
@@ -16,7 +16,7 @@ import { ContentModel } from "./models/content.model";
 import { LinkModel } from "./models/link.model";
 
 import { generateUrlHash } from "./utils";
-import { userMiddleware } from "./middleware";
+import { userMiddleware } from "./middleware/middleware";
 import authRouter from "./routes/auth.routes";
 import connectDB from "./config/db";
 
