@@ -3,10 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { UserModel } from "../models/user.model";
 import { RefreshTokenModel } from "../models/refreshToken.model";
-import {
-  ACESS_TOKEN_SECRET,
-  SALT_ROUNDS,
-} from "../config/config";
+import { ACESS_TOKEN_SECRET, SALT_ROUNDS } from "../config/config";
 import { signupSchema } from "../validators";
 import crypto from "crypto";
 
@@ -16,8 +13,6 @@ export const signupController = async (req: Request, res: Response) => {
     const username: string = req.body.username;
     const password: string = req.body.password;
     const confirmPassword: string = req.body.confirmPassword;
-
-
 
     if (password !== confirmPassword) {
       res.status(400).json({
@@ -46,10 +41,8 @@ export const signupController = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     const existingUser = await UserModel.findOne({
-      username,
-      email,
+      $or: [{ username }, { email }],
     });
-
     if (existingUser) {
       res.status(409).json({
         success: false,
@@ -76,10 +69,7 @@ export const signupController = async (req: Request, res: Response) => {
   }
 };
 
-
-
-// sigin controller 
-
+// sigin controller
 
 export const signinController = async (req: Request, res: Response) => {
   try {
@@ -89,7 +79,7 @@ export const signinController = async (req: Request, res: Response) => {
     if (!email || !password) {
       res.status(400).json({
         success: false,
-        message: "username and password are required",
+        message: "email and password are required",
       });
       return;
     }
@@ -126,21 +116,23 @@ export const signinController = async (req: Request, res: Response) => {
       { expiresIn: "15m" }, // access token epxires in 15 mintues make sense
     );
 
-    
-  // here i am generatinf refresh token 
+    // here i am generatinf refresh token
     const hashedToken = crypto.randomBytes(64).toString("hex");
-    
-   // using sha256 to hash the toekn for secuity
-    const refreshToken: string = crypto.createHash("sha256").update(hashedToken).digest("hex");
 
-  // inserting refresh token in db 
+    // using sha256 to hash the toekn for secuity
+    const refreshToken: string = crypto
+      .createHash("sha256")
+      .update(hashedToken)
+      .digest("hex");
+
+    // inserting refresh token in db
 
     await RefreshTokenModel.create({
       token: refreshToken,
       userId: existingUser._id,
       expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // refresh token expiry in 3 days
-    })
-    
+    });
+
     // sending access tokens and refresh tokens in http only cookies
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
@@ -162,8 +154,7 @@ export const signinController = async (req: Request, res: Response) => {
       },
       message: "You are logged in!",
     });
-  } catch(err) {
-    console.error("Error during signin:", err);
+  } catch (err) {
     res.status(500).json({
       success: false,
       message: "something went wrong!",
