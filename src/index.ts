@@ -1,7 +1,7 @@
 import express from "express";
 import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
-
+import cookieParser from "cookie-parser";
 import { requestRateLimiter } from "./middleware/ratelimiter";
 
 import { authRateLimiter } from "./middleware/authRateLimiter";
@@ -26,7 +26,7 @@ dotenv.config();
 const PORT = 3000;
 const app = express();
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(requestRateLimiter);
 app.use(
   cors({
