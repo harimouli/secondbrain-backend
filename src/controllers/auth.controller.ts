@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { UserModel } from "../models/user.model";
 import { RefreshTokenModel } from "../models/refreshToken.model";
-import { ACESS_TOKEN_SECRET, SALT_ROUNDS } from "../config/config";
+import { SALT_ROUNDS } from "../config/config";
 import { signupSchema } from "../validators";
 import crypto from "crypto";
 import { generateAcessToken } from "../services/accessToken.service";
