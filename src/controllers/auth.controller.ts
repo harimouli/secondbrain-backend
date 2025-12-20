@@ -137,11 +137,13 @@ export const signinController = async (req: Request, res: Response) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000, // 15 minutes
+      path: "/",
     });
 
     res.cookie("refreshToken", hashedToken, {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000, // same as for token expiry , for 3 days here make sense of remmebering token expiry in mind
+      path: "/",
     });
 
     res.status(200).json({
