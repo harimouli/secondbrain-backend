@@ -34,6 +34,7 @@ app.use(
       "http://localhost:5173",
       "https://secondbrain-frontend-snowy.vercel.app",
     ],
+    credentials: true,
   }),
 );
 
