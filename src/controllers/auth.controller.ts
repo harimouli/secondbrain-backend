@@ -6,6 +6,7 @@ import { RefreshTokenModel } from "../models/refreshToken.model";
 import { ACESS_TOKEN_SECRET, SALT_ROUNDS } from "../config/config";
 import { signupSchema } from "../validators";
 import crypto from "crypto";
+import { generateAcessToken } from "../services/accessToken.service";
 
 export const signupController = async (req: Request, res: Response) => {
   try {
@@ -108,14 +109,7 @@ export const signinController = async (req: Request, res: Response) => {
       return;
     }
 
-    const accessToken = jwt.sign(
-      {
-        userId: existingUser._id,
-      },
-      ACESS_TOKEN_SECRET,
-      { expiresIn: "15m" }, // access token epxires in 15 mintues make sense
-    );
-
+    const accessToken: string = generateAcessToken(existingUser._id);
     // here i am generatinf refresh token
     const hashedToken = crypto.randomBytes(64).toString("hex");
 
@@ -138,6 +132,7 @@ export const signinController = async (req: Request, res: Response) => {
       httpOnly: true,
       maxAge: 15 * 60 * 1000, // 15 minutes
       sameSite: "none",
+      secure: true,
       path: "/",
     });
 
@@ -145,6 +140,8 @@ export const signinController = async (req: Request, res: Response) => {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000, // same as for token expiry , for 3 days here make sense of remmebering token expiry in mind
       path: "/",
+      sameSite: "none",
+      secure: true,
     });
 
     res.status(200).json({
