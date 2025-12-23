@@ -7,7 +7,7 @@ import { SALT_ROUNDS } from "../config/config";
 import { signupSchema } from "../validators";
 import crypto from "crypto";
 import { generateAcessToken } from "../services/accessToken.service";
-
+const isProd = process.env.NODE_ENV === "production";
 export const signupController = async (req: Request, res: Response) => {
   try {
     const email: string = req.body.email;
@@ -131,8 +131,8 @@ export const signinController = async (req: Request, res: Response) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000, // 15 minutes
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
       path: "/",
     });
 
@@ -140,8 +140,8 @@ export const signinController = async (req: Request, res: Response) => {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000, // same as for token expiry , for 3 days here make sense of remmebering token expiry in mind
       path: "/",
-      sameSite: "none",
-      secure: true,
+      sameSite: isProd ? "none" : "lax",
+      secure: isProd,
     });
 
     res.status(200).json({
