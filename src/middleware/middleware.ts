@@ -17,9 +17,10 @@ export const userMiddleware = async (
 ): Promise<void> => {
   try {
     // verifying the access token
+
     const accessToken: string | undefined = req.cookies.accessToken;
     if (!accessToken) {
-      throw new Error("No access token");
+      throw new jwt.TokenExpiredError("No access token", new Date());
     }
     // revering the access token payload here
     const decoded = jwt.verify(accessToken as string, ACESS_TOKEN_SECRET);
@@ -44,6 +45,7 @@ export const userMiddleware = async (
   } catch (error) {
     // now we have to handle the access token expiry case here based on refresh token
     // here we are checking whether the error is due to token expiry or some other issue
+
     if (!(error instanceof jwt.TokenExpiredError)) {
       res.status(401).json({
         success: false,
