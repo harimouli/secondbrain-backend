@@ -6,7 +6,6 @@ import { requestRateLimiter } from "./middleware/ratelimiter";
 
 import { authRateLimiter } from "./middleware/authRateLimiter";
 
-import { Link } from "./models/link.model";
 import { AuthRequest } from "./middleware/middleware";
 
 import cors from "cors";
@@ -21,6 +20,7 @@ import authRouter from "./routes/auth.routes";
 import connectDB from "./config/db";
 
 import dotenv from "dotenv";
+
 dotenv.config();
 
 const PORT = 3000;
@@ -124,86 +124,56 @@ app.post(
     try {
       const { isPublic } = req.body;
       if (isPublic) {
-        // checking user preference to enable sharing functionality..lol
+        const hash: string = generateUrlHash(6); // here iam genertaing colison free hash using base62 encoding + crypto random bytes..lol
 
-        const existingLink: Link | null = await LinkModel.findOne({
-          // checking if link aleady existing in link collections
-          userId: req.userId,
+        // this will enuser if link is available already for that user , then it will return that link instead of creating new one .. lol or it will create new one .. lol
+        const link = await LinkModel.findOneAndUpdate(
+          { userId: req.userId },
+          { $setOnInsert: { userId: req.userId, hash } },
+          { upsert: true, new: true },
+        );
+
+        await UserModel.updateOne(
+          { _id: req.userId },
+          { isShareEnabled: true },
+        ); // enabling sharing functionality for user in user collection..lol
+        // if link already existis in db , then we are just returning that link .. lol
+        res.status(200).json({
+          success: true,
+          hash: `https://secondbrain-frontend-snowy.vercel.app/mind/${link.hash}`,
+          isShareEnabled: true,
+          message: "Your link is live now!",
         });
-
-        if (existingLink) {
-          // if link already existis in db , then we are just returning that link .. lol
-          res.status(200).json({
-            hash: `https://secondbrain-frontend-snowy.vercel.app/mind/${existingLink.hash}`,
-            isShareEnabled: true,
-          });
-          return;
-        }
-
-        const session = await mongoose.startSession();
-        try {
-          const hash: string = generateUrlHash(6); // here iam genertaing colison free hash using base62 encoding + crypto random bytes..lol
-
-          session.startTransaction(); // created a transaction for db consistency
-
-          await UserModel.findByIdAndUpdate(
-            { _id: req.userId },
-            { isShareEnabled: true },
-            { session },
-          ); // enabling sharing functionality for user in user collection..lol
-          await LinkModel.create([{ hash, userId: req.userId }], { session }); // creating new link in link collection
-          await session.commitTransaction();
-          session.endSession();
-
-          res.status(200).json({
-            hash: `https://secondbrain-frontend-snowy.vercel.app/mind/${hash}`,
-            isShareEnabled: true,
-            message: "Your link is live now!",
-          });
-        } catch (err) {
-          await session.abortTransaction();
-          session.endSession();
-          res.status(500).json({
-            hash: "",
-            isShareEnabled: false,
-            message: "Something went wrong!",
-          });
-        }
       }
       // if user wants to disable sharing functionality , they can do so this way ..lol
       else {
-        const session = await mongoose.startSession();
-
         try {
-          session.startTransaction();
-
           await UserModel.findOneAndUpdate(
             { _id: req.userId },
             { isShareEnabled: false },
-            { session },
           );
 
-          await LinkModel.deleteOne({ userId: req.userId }, { session });
-          await session.commitTransaction();
-          session.endSession();
+          await LinkModel.deleteOne({ userId: req.userId });
+
           res.status(200).json({
+            success: true,
             hash: null,
             isShareEnabled: false,
             message: "Sharing disabled successfully!",
           });
         } catch (err) {
-          await session.abortTransaction();
-          session.endSession();
           res.status(500).json({
-            hash: null,
+            hash: "",
             isShareEnabled: null, // or omit - state is unknown after failure
             message: "Something went wrong!",
           });
         }
       }
-    } catch {
+    } catch (error) {
+      console.log("error in shareable link endpoint", error);
       res.status(500).json({
-        hash: null,
+        success: false,
+        hash: "",
         isShareEnabled: false,
         message: "Something went wrong!",
       });
