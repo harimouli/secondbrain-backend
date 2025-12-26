@@ -2,11 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-
 import { requestRateLimiter } from "./middleware/ratelimiter";
-
 import { authRateLimiter } from "./middleware/authRateLimiter";
-
 import { userMiddleware } from "./middleware/middleware";
 import authRouter from "./routes/auth.routes";
 import contentRouter from "./routes/content.routes";
@@ -32,7 +29,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRateLimiter, authRouter);
-app.use("/api/v1/mind", userMiddleware, contentRouter);
+app.use("/api/v1/content", userMiddleware, contentRouter);
 app.use("/api/v1/contentshare", userMiddleware, shareRouter);
 app.use("/api/v1/sharedContent", publicShareRouter);
 
