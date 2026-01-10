@@ -29,7 +29,7 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRateLimiter, authRouter);
-app.use("/api/v1/content", userMiddleware, contentRouter);
+app.use("/api/v1/mind", userMiddleware, contentRouter);
 app.use("/api/v1/contentshare", userMiddleware, shareRouter);
 app.use("/api/v1/sharedContent", publicShareRouter);
 

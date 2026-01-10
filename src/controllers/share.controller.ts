@@ -25,6 +25,7 @@ export const shareUrlController = async (req: AuthRequest, res: Response) => {
         isShareEnabled: true,
         message: "Your link is live now!",
       });
+      return;
     }
     // if user wants to disable sharing functionality , they can do so this way ..lol
     else {
@@ -42,6 +43,7 @@ export const shareUrlController = async (req: AuthRequest, res: Response) => {
           isShareEnabled: false,
           message: "Sharing disabled successfully!",
         });
+        return;
       } catch (err) {
         res.status(500).json({
           hash: "",
