@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 export const addContentController = async (req: AuthRequest, res: Response) => {
   const { link, title, type } = req.body;
   const userId = req.userId;
+  console.log(req.body);
 
   try {
     await ContentModel.create({
@@ -19,6 +20,7 @@ export const addContentController = async (req: AuthRequest, res: Response) => {
       message: "Content added successfully!",
     });
   } catch (err) {
+    console.log(err);
     res.status(501).json({
       success: false,
       message: "Something went wrong!",
