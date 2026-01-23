@@ -23,6 +23,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
+      "http://localhost:5173/",
       "https://secondbrain-frontend-snowy.vercel.app",
     ],
     credentials: true,

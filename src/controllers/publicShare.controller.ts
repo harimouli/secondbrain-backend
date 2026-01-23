@@ -33,21 +33,20 @@ export const sharedContentController = async (
       return;
     }
     const sharedContent = await ContentModel.find({
-      // finding all content associated with that userId
       userId: userId,
+      share: true,
     });
 
-    if (sharedContent.length === 0) {
+    if (!sharedContent) {
       res.status(204).json({
         sharedContent: [],
         message: "No shared content found!",
       });
       return; // no content to share
     }
-
     res.status(200).json({
-      sharedContent,
-      message: "Shared content fetched successfully!", // successfully fetched shared content
+      sharedContent: sharedContent,
+      username: user.username,
     });
   } catch (err) {
     res.status(500).json({

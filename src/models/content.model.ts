@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 interface Content {
   title: string;
   link: string;
-  type: "youtube" | "tweet" | "article" | "note" | "website";
+  type: "youtube" | "twitter" | "article" | "note" | "website" | "X";
   share?: boolean;
   userId: mongoose.Types.ObjectId;
 }
@@ -14,7 +14,7 @@ const ContentSchema = new Schema<Content>({
   link: { type: String, required: true },
   type: {
     type: String,
-    enum: ["youtube", "tweet", "article", "note", "website"],
+    enum: ["youtube", "twitter", "article", "note", "website"],
     required: true,
   },
   share: { type: Boolean, default: false },
