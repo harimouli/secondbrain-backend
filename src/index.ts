@@ -10,6 +10,7 @@ import contentRouter from "./routes/content.routes";
 import publicShareRouter from "./routes/publicShare.route";
 import connectDB from "./config/db";
 import shareRouter from "./routes/share.routes";
+import changePasswordRouter from "./controllers/password.controller";
 
 dotenv.config();
 
@@ -31,7 +32,8 @@ app.use(
 app.use("/api/v1/auth", authRateLimiter, authRouter);
 app.use("/api/v1/mind", userMiddleware, contentRouter);
 app.use("/api/v1/contentshare", userMiddleware, shareRouter);
-app.use("/api/v1/sharedContent", publicShareRouter);
+app.use("/api/v1/public-content", publicShareRouter);
+app.use("/api/v1/authpassword", userMiddleware, changePasswordRouter);
 
 connectDB();
 
