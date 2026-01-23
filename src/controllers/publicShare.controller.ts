@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../middleware/middleware";
 import { LinkModel } from "../models/link.model";
 import { ContentModel } from "../models/content.model";
+import { UserModel } from "../models/user.model";
 
 export const sharedContentController = async (
   req: AuthRequest,
@@ -24,6 +25,13 @@ export const sharedContentController = async (
 
     const userId = linkDoc.userId; // extracting userId from link document
 
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      res.status(404).json({
+        message: "User not found!",
+      });
+      return;
+    }
     const sharedContent = await ContentModel.find({
       // finding all content associated with that userId
       userId: userId,
