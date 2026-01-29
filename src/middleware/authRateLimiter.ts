@@ -2,7 +2,7 @@ import rateLimit from "express-rate-limit";
 import { Request, Response } from "express";
 export const authRateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes..lol protection from bad guys trying to brute force login.. lol
-  max: 14, // limit each IP to 14 requests per windowMs....lol brute force protection
+  max: 30, // limit each IP to 30 requests per windowMs....lol brute force protection
   handler: (req: Request, res: Response) => {
     res.status(429).json({
       success: false,
