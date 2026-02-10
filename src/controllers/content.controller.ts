@@ -5,7 +5,6 @@ import mongoose from "mongoose";
 export const addContentController = async (req: AuthRequest, res: Response) => {
   const { link, title, type } = req.body;
   const userId = req.userId;
-  console.log(req.body);
 
   try {
     await ContentModel.create({

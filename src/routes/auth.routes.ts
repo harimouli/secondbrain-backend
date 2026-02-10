@@ -9,6 +9,6 @@ const authRouter = Router();
 
 authRouter.post("/signup", signupController);
 authRouter.post("/signin", signinController);
-authRouter.get("/verifylogin", verifyauth);
+authRouter.get("/verify-login", verifyauth);
 
 export default authRouter;

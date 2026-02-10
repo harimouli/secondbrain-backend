@@ -139,7 +139,7 @@ export const signinController = async (req: Request, res: Response) => {
     res.cookie("refreshToken", hashedToken, {
       httpOnly: true,
       maxAge: 3 * 24 * 60 * 60 * 1000, // same as for token expiry , for 3 days here make sense of remmebering token expiry in mind
-      path: "/",
+      path: "/access-token", // this cookie will only be sent to the access token generation endpoint
       sameSite: isProd ? "none" : "lax",
       secure: isProd,
     });

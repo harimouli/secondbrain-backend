@@ -11,7 +11,7 @@ import publicShareRouter from "./routes/publicShare.route";
 import connectDB from "./config/db";
 import shareRouter from "./routes/share.routes";
 import changePasswordRouter from "./controllers/password.controller";
-
+import accessTokenGenRouter from "./routes/accessTokenGen.route";
 dotenv.config();
 
 const PORT = 3000;
@@ -35,7 +35,7 @@ app.use("/api/v1/mind", userMiddleware, contentRouter);
 app.use("/api/v1/contentshare", userMiddleware, shareRouter);
 app.use("/api/v1/public-content", publicShareRouter);
 app.use("/api/v1/authpassword", userMiddleware, changePasswordRouter);
-
+app.use("/api/v1/auth/refresh", accessTokenGenRouter);
 connectDB();
 
 app.listen(process.env.PORT || PORT, () => {
